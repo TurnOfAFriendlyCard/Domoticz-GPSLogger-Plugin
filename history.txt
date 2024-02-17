@@ -1,0 +1,18 @@
+#v020 February 2024
+      Code cleanup and optimizing in order to publish on Github.
+      Prepared Distance device (to do in future).
+
+#v011 February 2024
+      Location address details via OSM/TomTom.
+      Home location and own fixed location (via locations.txt).
+
+#v010 January 2024
+      Implemented GPS Logger as standard tool for capturing location data and more (battery and speed).
+      HTTP API integration including Base64 authorization with Domoticz up and running.
+      Basic Python plugin defined based on life360 Plugin by Fibalci and updated by marathon2010.
+
+#v001 December 2023
+      Created HTML and Javascript app including API call to Domoticz.
+      Integration included latitude and longitude of current location shared every x seconds.
+      Data captured in Domoticz text dummy device.
+      Issue hard to resolve was creating a loop for obtaining locations (as location API has to be trigged by a button).
