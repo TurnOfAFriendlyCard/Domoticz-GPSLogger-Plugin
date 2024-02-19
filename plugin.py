@@ -1,7 +1,7 @@
 """
-<plugin key="GPSLogger" name="GPS Logger Presence" author="marathon2010" version="20">
+<plugin key="GPSLogger" name="GPS Logger Presence" author="marathon2010" version="2.2.0">
     <description>
-        <h2>Domoticz GPS Logger Plugin - v20</h2>
+        <h2>Domoticz GPS Logger Plugin - v2.2.0</h2>
         This plugin collects location data via GPS Logger app and stores in Domoticz via standard API.<br/>
     </description>
     <params>

@@ -44,10 +44,10 @@ class osmapi:
 
     def getaddress(self,lat,lon):
         url=self.rgeocodeaddr % (str(lat),str(lon))
- ###       Domoticz.Debug('Address URL:'+url)
+        Domoticz.Debug('Address URL:'+url)
         stat, req = self.make_request(type=0,url=url)
- ###       Domoticz.Debug('OStat Addr:'+str(stat))
- ###       Domoticz.Debug('OReq Addr:'+str(req))
+        Domoticz.Debug('OStat Addr:'+str(stat))
+        Domoticz.Debug('OReq Addr:'+str(req))
         return stat,req
 
     def getdistance(self,lat1,lon1,lat2,lon2):
