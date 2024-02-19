@@ -94,6 +94,15 @@ The Android app `GPSLogger` is described at https://gpslogger.app/. Installation
 18. The GPSLogger can be closed, will run in the background.
 19. Repeat these steps for every mobile phone involved. Take care to use different `Idx` numbers (step D12).
 
+### E. Locations
+The plugin comes with a file `locations.txt`. In this files you may define your own locations. Instead of showing the full address in the `location` device the shortname will be shown. The file may look like this (first line not to be changed or removed):
+
+`Name,Latitude,Longitude,Radius`
+
+`Town Hall Rotterdam,51.922710,4.479160,50`
+
+Multiple lines for your own locations can be defined.
+
 ### HISTORY 
 The concept is based on the `Life360 Plugin` by fibalci. This plugin is not maintained anymore and also deprecated.
 He thanked Harper Reed for Python implementation of Life 360 API: https://github.com/harperreed/life360-python.
