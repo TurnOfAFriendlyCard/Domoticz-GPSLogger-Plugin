@@ -29,9 +29,12 @@ Next devices will be created and updated in Domoticz (in the utility tab unless 
 ### A. Plugin
 1. Open a `PuTTY` session.
 2. In the session go to the `Plugin` folder of Domoticz.
-3. Create a folder for the plugin (`mkdir Domoticz-GPSLogger`).
-4. Go to that folder (`cd Domoticz-GPSLogger`).
-5. Download the Plugin: git clone https://github.com/TurnOfAFriendlyCard/Domoticz-GPSLogger-Plugin
+3. Download the Plugin: `git clone https://github.com/TurnOfAFriendlyCard/Domoticz-GPSLogger-Plugin`
+4. Alternative is to download and extract the zip file:
+   - Go to https://github.com/TurnOfAFriendlyCard/Domoticz-GPSLogger-Plugin
+   - Click on Code and select Download ZIP.
+   - Create a folder for the plugin (`mkdir Domoticz-GPSLogger`) in the `Plugin` folder of Domoticz.
+5. Go to folder (`cd Domoticz-GPSLogger`).
 6. Make the plugin.py file executable (`chmod 755 plugin.py`).
 7. Restart Domoticz.
 
