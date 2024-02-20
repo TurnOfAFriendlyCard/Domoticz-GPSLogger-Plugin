@@ -1,7 +1,7 @@
 """
-<plugin key="GPSLogger" name="GPS Logger Presence" author="marathon2010" version="2.2.0">
+<plugin key="GPSLogger" name="GPS Logger Presence" author="marathon2010" version="2.2.1">
     <description>
-        <h2>Domoticz GPS Logger Plugin - v2.2.0</h2>
+        <h2>Domoticz GPS Logger Plugin - v2.2.1</h2>
         This plugin collects location data via GPS Logger app and stores in Domoticz via standard API.<br/>
     </description>
     <params>
@@ -98,7 +98,7 @@ class BasePlugin:
                     Domoticz.Device(Name=self.deviceUser[member]+' Location', Unit=(member*self.numberDevicesPerMember)+2, TypeName="Text", Used=1).Create()
                     Domoticz.Device(Name=self.deviceUser[member]+' Battery',Unit=(member*self.numberDevicesPerMember)+3, TypeName="Percentage", Used=1).Create()
                     Domoticz.Device(Name=self.deviceUser[member]+' Distance',Unit=(member*self.numberDevicesPerMember)+4, TypeName="Custom", Options={"Custom": "1;mins"}, Used=1).Create()
-                    Domoticz.Device(Name=self.deviceUser[member]+' Speed',Unit=(member*self.numberDevicesPerMember)+5, TypeName="Custom", Options={"Custom": "1;km/u"}, Used=1).Create()
+                    Domoticz.Device(Name=self.deviceUser[member]+' Speed',Unit=(member*self.numberDevicesPerMember)+5, TypeName="Custom", Options={"Custom": "1;km/h"}, Used=1).Create()
                     Domoticz.Device(Name=self.deviceUser[member]+' RawData',Unit=(member*self.numberDevicesPerMember)+6, TypeName="Text", Used=0).Create()
                     Domoticz.Debug('Devices: '+str(self.numberDevicesPerMember)+','+self.deviceUser[member])
             Domoticz.Debug(str(self.deviceUser))
