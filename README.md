@@ -56,9 +56,9 @@ Next devices will be created and updated in Domoticz (in the utility tab unless 
 ### C. Encode username/password
 1. Go to the website https://www.base64encode.org/ to encode username and password into Base64 format.
 2. Click on Encode.
-3. Enter `username`:`password` into the text box. This the username/password defined in step B6. Also include the **colon** as separation between username and password.
+3. Enter `username`:`password` into the text box. This the username/password defined in step B5. Also include the **colon** as separation between username and password.
 4. So the text would look like `LocUser:LocPWD1234` where **LocUser** is the `username` and **LocPWD1234** is the `password`.
-5. Output is something like `TG9jVXNlcjpMb2NQV0QxMjM0`
+5. Output is something like `TG9jVXNlcjpMb2NQV0QxMjM0` (the example in step 4 should give the exact same result).
 
 ### D. GPSLogger
 The Android app `GPSLogger` is described at https://gpslogger.app/. Installation of the app is via `F-Droid` (Free and Open Source Software).
@@ -72,7 +72,7 @@ The Android app `GPSLogger` is described at https://gpslogger.app/. Installation
 4. Click on the `green search glass` in the bottom right-corner.
 5. In the search bar on the top side of the screen enter `GPSLogger`.
 6. Click on `Install` button to install the GPSLogger app.
-7. Open GPSLogger app (vs 129 was used during plugin v20 development).
+7. Open GPSLogger app (vs 129 was used during plugin v2.0.0 development).
 8. Approve authorizations (location, files/photo's and battery background).
 9. In `Logging details` switch on "Log to custom URL" and switch off "Log to GPX".
 10. In `Performance` set "Logging Interval" to for instance 15 seconds (so data is shared to Domoticz by this interval).
