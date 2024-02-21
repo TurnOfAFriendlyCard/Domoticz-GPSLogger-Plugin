@@ -1,3 +1,9 @@
+#v2.2.2 February 2024
+        Solved issue #1 (Round speed one decimal).
+
+#v2.2.1 February 2024
+        Solved issue #2 (Speed device unit of measure text).
+
 #v2.2.0 February 2024
         Code cleanup and optimizing in order to publish on Github.
         Prepared Distance device (to do in future).

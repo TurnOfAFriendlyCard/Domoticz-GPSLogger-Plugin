@@ -1,7 +1,7 @@
 """
-<plugin key="GPSLogger" name="GPS Logger Presence" author="marathon2010" version="2.2.1">
+<plugin key="GPSLogger" name="GPS Logger Presence" author="marathon2010" version="2.2.2">
     <description>
-        <h2>Domoticz GPS Logger Plugin - v2.2.1</h2>
+        <h2>Domoticz GPS Logger Plugin - v2.2.2</h2>
         This plugin collects location data via GPS Logger app and stores in Domoticz via standard API.<br/>
     </description>
     <params>
@@ -166,7 +166,7 @@ class BasePlugin:
              if self.numberItemsRawData == len(locData):
                  self.circleLatitude  = float(locData[0])
                  self.circleLongitude = float(locData[1])
-                 self.circleSpeed     = float(locData[2])*float(self.factorSpeed)
+                 self.circleSpeed     = round(float(locData[2])*float(self.factorSpeed))
                  self.circleBattery   = float(locData[3])
 
                  distanceToHome       = haversine(float(self.circleLatitude),float(self.circleLongitude),float(self.myHomelat),float(self.myHomelon))
