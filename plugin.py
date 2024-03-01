@@ -1,35 +1,41 @@
 """
-<plugin key="GPSLogger" name="GPS Logger Presence" author="marathon2010" version="2.2.2">
+<plugin key="GPSLogger" name="GPS Logger Presence" author="marathon2010" version="3.0.0">
     <description>
-        <h2>Domoticz GPS Logger Plugin - v2.2.2</h2>
-        This plugin collects location data via GPS Logger app and stores in Domoticz via standard API.<br/>
+        <h2>Domoticz GPS Logger Plugin - v3.0.0</h2>
+        This plugin collects location data via GPS Logger app and stores in Domoticz devices via standard API.<br/>
     </description>
     <params>
-        <param field="Mode1" label="Users GPSLogger" width="400px" required="true" default="user1;user2;user3;"/>
-        <param field="Mode2" label="Fence size (m)"  width="75px"  required="true" default="50"/>
-        <param field="Mode3" label="Map provider"    width="300px">
+        <param field="Mode1" label="Users GPSLogger"   width="400px"  required="true"   default="user1;user2;user3;"/>
+        <param field="Mode2" label="Fence size (m)"    width="75px"   required="true"   default="50"/>
+        <param field="Mode3" label="Map provider"      width="300px"  required="true" >
             <options>
-                <option label="TomTom Maps"    value="TM"/>
-                <option label="Open Streetmap" value="OSM" default="true" />
+                <option label="TomTom Maps"            value="TM"/>
+                <option label="Open Streetmap"         value="OSM"                      default="true" />
             </options>
         </param>
-        <param field="Mode4" label="TomTom API Key" width="300px" required="false"/>
-        <param field="Mode5" label="Debug"          width="75px">
+        <param field="Mode4" label="TomTom API Key"    width="300px"  required="false"/>
+        <param field="Mode5" label="Map presentation"  width="300px"  required="true" >
             <options>
-                <option label="True"  value="Debug"/>
-                <option label="False" value="Normal"  default="true" />
+                <option label="Google Maps"            value="GM"/>
+                <option label="Open Streetmap"         value="OSM"                      default="true" />
+            </options>
+        </param>
+        <param field="Mode6" label="Debug"             width="75px"   required="true" >
+            <options>
+                <option label="True"                   value="Debug"/>
+                <option label="False"                  value="Normal"                   default="true" />
             </options>
         </param>
     </params>
 </plugin>
 """
 import Domoticz
-import datetime
 import time
 
 from math      import radians, cos, sin, asin, sqrt
 from tomtomapi import tomtomapi
 from osmapi    import osmapi
+from datetime  import datetime
 
 import json
 
@@ -37,32 +43,60 @@ class BasePlugin:
 
     def __init__(self):
 
+        # variables used in the process
         self.circleUser             = ''         # user being processed
         self.circleBattery          = 0          # battery percentage of mobile phone for user being processed
         self.circleLatitude         = 0          # latitude value of mobile phone for user being processed
         self.circleLongitude        = 0          # longitude value of mobile phone for user being processed
+        self.circleLatitudePrev     = 0          # latitude value of mobile phone for user being processed last time captured
+        self.circleLongitudePrev    = 0          # longitude value of mobile phone for user being processed last time captured
         self.circleLocationName     = ''         # location details of mobile phone for user being processed
         self.circleSpeed            = 0          # speed value of mobile phone for user being processed
         self.deviceUser             = []         # users in the circle (entered as parameter Mode1)
         self.fenceSize              = 0          # size of the fence to determine Home (entered as parameter Mode2)
-        self.factorSpeed            = 3.6        # factor to convert speed from m/s to km/h
+        self.mapBase                = ''         # Base part for map to be used to present location
+        self.mapSeparator           = ''         # Separator of latitude and longitude for map to be used to present location 
         self.myHomelat              = 0          # latutide home location (captured from Domoticz settings)
         self.myHomelon              = 0          # longitude home location (captured from Domoticz settings)
         self.locationNames          = []         # list of fixed locations stored in "locations.txt"
         self.membercount            = 0          # number of users in the circle (entered as parameter Mode1)
-        self.numberDevicesPerMember = 6          # number of devices in Domoticz for each user
-        self.numberItemsRawData     = 4          # number of fields reported by GPS Logger (4: latitude, longitude, speed and battery)
-        self.selectedMap            = ''         # what map is used for addresses and distance ((entered as parameter Mode3)
+        self.selectedMap            = ''         # what map is used for addresses and distance (entered as parameter Mode3)
         self.tomtomapikey           = ''         # what is the API key for TomTom if that map is used (entered as parameter Mode4)
+
+        # constants used in the process
+        self.codeGoogleMaps         = 'GM'        # short for usage Google Maps
+        self.codeOpenStreetMaps     = 'OSM'       # short for usage Open StreetMaps
+        self.codeTomTomMaps         = 'TM'        # short for usage Tom Tom Maps
+        self.devPresence            = 1           # indicator Presence device in sequence of all devices defined
+        self.devLocation            = 2           # indicator Location device in sequence of all devices defined
+        self.devBattery             = 3           # indicator Battery device in sequence of all devices defined
+        self.devDistance            = 4           # indicator Distance device in sequence of all devices defined
+        self.devSpeed               = 5           # indicator Speed device in sequence of all devices defined
+        self.devRawData             = 6           # indicator RawData device in sequence of all devices defined
+        self.devMap                 = 7           # indicator Map device in sequence of all devices defined
+        self.factorSpeed            = 3.6         # factor to convert speed from m/s to km/h
+        self.numberDevicesPerMember = self.devMap # number of devices in Domoticz for each user
+        self.numberItemsRawData     = 4           # number of fields reported by GPS Logger (4: latitude, longitude, speed and battery)
+        self.timeDiff               = 60          # maximum number of seconds between actual time and last update location in order to update map device
+
+        # define links for publishing location on maps, two types defined: Google Maps and Open Streetmap
+        self.mapLink                = '<a href='
+        self.mapGMBase              = '"http://www.google.com/maps/search/?api=1&query='                     # Google Maps base link
+        self.mapGMSeparator         = ','                                                                    # Google Maps separator of latitude and longitude
+        self.mapOSMBase             = '"https://www.openstreetmap.org/#map=16/'                              # Open StreetMaps base link
+        self.mapOSMSeparator        = '/'                                                                    # Open StreetMaps separator of latitude and longitude
+        self.mapSuffix              = '" target="_new">Click to Open Map</a>'
 
         return
 
     def onStart(self):
         Domoticz.Log("onStart called")
 
-        if (Parameters["Mode5"] == "Debug"):
+        # Debug mode required?
+        if (Parameters["Mode6"] == "Debug"):
             Domoticz.Debugging(1)
 
+        # Load the images
         if ("GPSLoggerPresence" not in Images):
             Domoticz.Debug('Icons Created...')
             Domoticz.Image('GPSLoggerIcons.zip').Create()
@@ -83,6 +117,7 @@ class BasePlugin:
             Domoticz.Log("Unable to parse coordinates")
             return False
 
+        # Capture input on fence size and users
         self.fenceSize   = int(Parameters["Mode2"])
         self.deviceUser  = Parameters["Mode1"].split(";")
         self.membercount = int(Parameters["Mode1"].count(';'))+1
@@ -93,13 +128,14 @@ class BasePlugin:
                 if (self.deviceUser[member] == ""):
                     Domoticz.Debug('User empty; index = '+str(member+1))
                 else:
-                    # create six devices and the last one (RawData) not being visible in the switches or utility tab.
-                    Domoticz.Device(Name=self.deviceUser[member]+' Presence', Unit=(member*self.numberDevicesPerMember)+1, TypeName="Switch", Image=iconPID, Used=1).Create()
-                    Domoticz.Device(Name=self.deviceUser[member]+' Location', Unit=(member*self.numberDevicesPerMember)+2, TypeName="Text", Used=1).Create()
-                    Domoticz.Device(Name=self.deviceUser[member]+' Battery',Unit=(member*self.numberDevicesPerMember)+3, TypeName="Percentage", Used=1).Create()
-                    Domoticz.Device(Name=self.deviceUser[member]+' Distance',Unit=(member*self.numberDevicesPerMember)+4, TypeName="Custom", Options={"Custom": "1;mins"}, Used=1).Create()
-                    Domoticz.Device(Name=self.deviceUser[member]+' Speed',Unit=(member*self.numberDevicesPerMember)+5, TypeName="Custom", Options={"Custom": "1;km/h"}, Used=1).Create()
-                    Domoticz.Device(Name=self.deviceUser[member]+' RawData',Unit=(member*self.numberDevicesPerMember)+6, TypeName="Text", Used=0).Create()
+                    # create devices and RawData not being visible in the switches or utility tab.
+                    Domoticz.Device(Name=self.deviceUser[member]+' Presence', Unit=(member*self.numberDevicesPerMember)+self.devPresence, TypeName="Switch"    , Image=iconPID               , Used=1).Create()
+                    Domoticz.Device(Name=self.deviceUser[member]+' Location', Unit=(member*self.numberDevicesPerMember)+self.devLocation, TypeName="Text"                                    , Used=1).Create()
+                    Domoticz.Device(Name=self.deviceUser[member]+' Battery',  Unit=(member*self.numberDevicesPerMember)+self.devBattery,  TypeName="Percentage"                              , Used=1).Create()
+                    Domoticz.Device(Name=self.deviceUser[member]+' Distance', Unit=(member*self.numberDevicesPerMember)+self.devDistance, TypeName="Custom"    , Options={"Custom": "1;mins"}, Used=1).Create()
+                    Domoticz.Device(Name=self.deviceUser[member]+' Speed',    Unit=(member*self.numberDevicesPerMember)+self.devSpeed,    TypeName="Custom"    , Options={"Custom": "1;km/h"}, Used=1).Create()
+                    Domoticz.Device(Name=self.deviceUser[member]+' RawData',  Unit=(member*self.numberDevicesPerMember)+self.devRawData,  TypeName="Text"                                    , Used=0).Create()
+                    Domoticz.Device(Name=self.deviceUser[member]+' Map',      Unit=(member*self.numberDevicesPerMember)+self.devMap,      TypeName="Text"                                    , Used=1).Create()
                     Domoticz.Debug('Devices: '+str(self.numberDevicesPerMember)+','+self.deviceUser[member])
             Domoticz.Debug(str(self.deviceUser))
             with open(Parameters["HomeFolder"]+"deviceorder.txt","w") as f:
@@ -111,16 +147,26 @@ class BasePlugin:
         Domoticz.Debug("Devices available...")
         DumpConfigToLog()
 
-        if (Parameters["Mode3"] == "OSM"):
-            self.selectedMap = "OSM"
-        else:
-            self.selectedMap = "TM"
-		
-        if (Parameters["Mode4"] == ""):
-            self.tomtomapikey = 'Empty'
-        else:
-            self.tomtomapikey = Parameters["Mode4"]
+        # Capture the Maps to present onto and request data from
+        if (Parameters["Mode3"] == self.codeOpenStreetMaps):
+            self.selectedMap    =  self.codeOpenStreetMaps
+        if (Parameters["Mode3"] == self.codeTomTomMaps):
+            self.selectedMap    =  self.codeTomTomMaps
 
+        if (Parameters["Mode5"]  == self.codeOpenStreetMaps):
+            self.mapSeparator    =  self.mapOSMSeparator 
+            self.mapBase         =  self.mapLink + self.mapOSMBase
+        if (Parameters["Mode5"]  == self.codeGoogleMaps):
+            self.mapSeparator    =  self.mapGMSeparator 
+            self.mapBase         =  self.mapLink + self.mapGMBase
+
+        # Define the TomTom API key if any
+        if (Parameters["Mode4"] == ""):
+            self.tomtomapikey   = 'Empty'
+        else:
+            self.tomtomapikey   = Parameters["Mode4"]
+
+        # Read the used defined locations
         try:
             with open(Parameters["HomeFolder"]+"locations.txt") as f:
                 for line in f:
@@ -161,8 +207,8 @@ class BasePlugin:
     def onHeartbeat(self):
         Domoticz.Debug("onHeartBeat called.")
         for member in range (self.membercount):
-             Domoticz.Debug('Processing '+str(member)+' RawData: '+Devices[member*self.numberDevicesPerMember+6].Name+' = "'+Devices[member*self.numberDevicesPerMember+6].sValue+'"')
-             locData = Devices[member*self.numberDevicesPerMember+6].sValue.split(";")
+             Domoticz.Debug('Processing '+str(member)+' RawData: '+Devices[member*self.numberDevicesPerMember+self.devRawData].Name+' = "'+Devices[member*self.numberDevicesPerMember+self.devRawData].sValue+'"')
+             locData = Devices[member*self.numberDevicesPerMember+self.devRawData].sValue.split(";")
              if self.numberItemsRawData == len(locData):
                  self.circleLatitude  = float(locData[0])
                  self.circleLongitude = float(locData[1])
@@ -187,29 +233,49 @@ class BasePlugin:
                          if int(distanceToLoc)<=int(line[3]):
                              self.circleLocationName=line[0]
 
-                 UpdateDevice((member*self.numberDevicesPerMember)+1,presenceValue,presenceValueText)                                      # Presence Device
-                 UpdateDevice((member*self.numberDevicesPerMember)+3,int(float(self.circleBattery)),str(int(float(self.circleBattery))))   # Battery Device
-                 UpdateDevice((member*self.numberDevicesPerMember)+5,0,str(self.circleSpeed))                                              # Speed Device
+                 UpdateDevice((member*self.numberDevicesPerMember)+self.devPresence,presenceValue,presenceValueText)                                   # Presence Device
+                 UpdateDevice((member*self.numberDevicesPerMember)+self.devBattery,int(float(self.circleBattery)),str(int(float(self.circleBattery)))) # Battery Device
+                 UpdateDevice((member*self.numberDevicesPerMember)+self.devSpeed,0,str(self.circleSpeed))                                              # Speed Device
 #                 currentmin = 0
                  if self.circleLocationName != "":                                                                                         # Location either fixed location or Home
                      currentloc = self.circleLocationName
                  else:                                                                                                                     # Determine location via API on selected map
                      currentloc = None
 
-                     if self.selectedMap   == "TM":
-                         mapAPI = tomtomapi()
-                     elif self.selectedMap == "OSM":
-                         mapAPI = osmapi()
+                     if self.selectedMap   == self.codeTomTomMaps:
+                         mapAPI            =  tomtomapi()
+                     elif self.selectedMap == self.codeOpenStreetMaps:
+                         mapAPI            =  osmapi()
 
-                     if self.selectedMap   == "TM":
+                     if self.selectedMap   == self.codeTomTomMaps:
                          currentstat2, currentloc = mapAPI.getaddress(self.tomtomapikey,self.circleLatitude,self.circleLongitude)
 #                         currentstat, currentmin  = mapAPI.getdistance(self.tomtomapikey,self.circleLatitude,self.circleLongitude,self.myHomelat,self.myHomelon)
-                     elif self.selectedMap == "OSM":
+                     elif self.selectedMap == self.codeOpenStreetMaps:
                          currentstat2, currentloc = mapAPI.getaddress(self.circleLatitude,self.circleLongitude)
 #                         currentstat, currentmin  = mapAPI.getdistance(self.circleLatitude,self.circleLongitude,self.myHomelat,self.myHomelon)
                          time.sleep(1)                                                                                                     # In respect of OSM's usage policy of 1 call per second
-                 UpdateDevice((member*self.numberDevicesPerMember)+2,1,currentloc)                                                         # Location Device
-#                 UpdateDevice((member*self.numberDevicesPerMember)+4,0,currentmin)                                                         # Distance Device
+
+                 UpdateDevice((member*self.numberDevicesPerMember)+self.devLocation,1,currentloc)                                          # Location Device
+
+                 # Location device within Domoticz will be updated only if the actual location is changed (behavior of Domoticz). So for instance when a user remains at Home the map device
+                 # does not need to be changed as well. Approach is to retrieve the last seen timestamp of the location device. If that is changed
+                 # recently (within the last 60 seconds) also the map device will be updated.
+                 # Class strptime within function datetime is not used as this sometimes results in "TypeError: 'NoneType' object is not callable".
+
+                 timeCurrent    = str(datetime.now())
+                 timeLastUpdate = str(Devices[member*self.numberDevicesPerMember+self.devLocation].LastUpdate)
+
+                 # Example .now()     is 2022-03-01 14:30:15.123456
+                 # Example LastUpdate is 2024-02-29 16:17:01
+                 
+                 if str(timeCurrent[0:10]) == str(timeLastUpdate[0:10]):                                                                   # Only checking time when same dates
+                     Domoticz.Debug('Update Map ' + str(timeLastUpdate) + '; ' + str(timeCurrent))
+                     timeDiff     = (int(timeCurrent[11:13]) - int(timeLastUpdate[11:13])) * 3600 + (int(timeCurrent[14:16]) - int(timeLastUpdate[14:16])) * 60 + int(timeCurrent[17:19]) - int(timeLastUpdate[17:19])
+                     if timeDiff <= self.timeDiff:                                                                                         # Actual difference in seconds is with updated map checked difference
+                         showMap  = self.mapBase + str(self.circleLatitude) + self.mapSeparator + str(self.circleLongitude) + self.mapSuffix        # Define link for click on maps text
+                         UpdateDevice((member*self.numberDevicesPerMember)+self.devMap,1,showMap)                                          # Map Device
+
+#                 UpdateDevice((member*self.numberDevicesPerMember)+self.devDistance,0,currentmin)                                          # Distance Device
 
 global _plugin
 _plugin = BasePlugin()

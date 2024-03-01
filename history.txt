@@ -1,3 +1,12 @@
+#v3.0.0 March 2024
+        Solved issue #4 (Show location on map):
+        - added new input field (Map presentation in Mode5).
+        - reworked Debug parameter (from Mode5 to Mode6).
+        - added new device (Maps).
+        Added constants for flexibility.
+        Added comments for explanation.
+        Reworked for more flexiblity.
+
 #v2.2.2 February 2024
         Solved issue #1 (Round speed one decimal).
 
