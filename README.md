@@ -23,7 +23,8 @@ Next devices will be created and updated in Domoticz (in the utility tab unless 
 3. `Battery`:  Charging percentage of the battery of the user.
 4. `Distance`: Distance in minutes of the actual location to the fence (to implement in future).
 5. `Speed`:    Speed in kilometers / hour of the user.
-6. `RawData`:  Data which is captured from the GPSLogger app. This device is hidden (only in devices tab).
+6. `Map`:      Hyperlink to show the location on a map (separate window will be opened).
+7. `RawData`:  Data which is captured from the GPSLogger app. This device is hidden (only in devices tab).
 
 ## INSTALLATION / SETUP
 ### A. Plugin
@@ -40,13 +41,14 @@ Next devices will be created and updated in Domoticz (in the utility tab unless 
 
 ### B. Domoticz
 1. In the hardware tab a new `type` will be available: `GPS Logger Presence`.
-2. Create the new hardware:
+2. Create the new hardware (if version before 3.3.0 was installed, first delete that hardware - new Map device is created):
    - Enter a logical name (for instance `Location`). Will be a prefix to all devices created.
    - Select the hardware type `GPS Logger Presence`.
    - Enter the names of each user of the mobile phones. Just logical names, not a Domoticz username. Separate with semicolons.
    - Enter the fence size in meters of the Home location. Within this fence Home is determined.
    - Select the map providor (either `Open Streetmap` or `TomTom`).
       - For `TomTom` obtain an API key (see History on how-to).
+   - Select the map presentation (either `Open Streetmap` or `Google Maps`).
    - When required debug message can be shown in the Domoticz log (set Debug on True).
    - Press Add to complete the installation.
 4. Devices as summarized above will be created and plugin will be started.
