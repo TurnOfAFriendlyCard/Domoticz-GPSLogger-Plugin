@@ -42,8 +42,10 @@ Next devices will be created and updated in Domoticz (in the utility tab unless 
 ### B. Domoticz
 1. In the hardware tab a new `type` will be available: `GPS Logger Presence`.
 2. Create the new hardware (if version before 3.3.0 was installed, first delete that hardware - new Map device is created):
-   - Enter a logical name (for instance `Location`). Will be a prefix to all devices created.
+   - Enter a logical hardware name (for instance `Location`). Will be a prefix to all devices created.
    - Select the hardware type `GPS Logger Presence`.
+   - Select Log Level (normally only `Status` and `Error`).
+   - Select Data Timeout (default `Disabled`).
    - Enter the names of each user of the mobile phones. Just logical names, not a Domoticz username. Separate with semicolons.
    - Enter the fence size in meters of the Home location. Within this fence Home is determined.
    - Select the map providor (either `Open Streetmap` or `TomTom`).
