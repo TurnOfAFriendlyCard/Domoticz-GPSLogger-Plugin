@@ -1,7 +1,7 @@
 """
-<plugin key="GPSLogger" name="GPS Logger Presence" author="marathon2010" version="3.0.0">
+<plugin key="GPSLogger" name="GPS Logger Presence" author="marathon2010" version="3.0.1">
     <description>
-        <h2>Domoticz GPS Logger Plugin - v3.0.0</h2>
+        <h2>Domoticz GPS Logger Plugin - v3.0.1</h2>
         This plugin collects location data via GPS Logger app and stores in Domoticz devices via standard API.<br/>
     </description>
     <params>
@@ -119,9 +119,13 @@ class BasePlugin:
 
         # Capture input on fence size and users
         self.fenceSize   = int(Parameters["Mode2"])
-        self.deviceUser  = Parameters["Mode1"].split(";")
-        self.membercount = int(Parameters["Mode1"].count(';'))+1
-        Domoticz.Debug('Member Count '+str(self.membercount))
+        usrString        = Parameters["Mode1"]
+        self.deviceUser  = usrString.split(";")
+        self.membercount = int(usrString.count(';'))+1
+        if usrString[-1] == ";":                                          # last character in userstring data entry is semi colon, so empty user
+            self.membercount -= 1
+ 
+        Domoticz.Debug('Member Count '+str(self.membercount) + ' for ' + str(usrString))
 
         if (len(Devices) == 0):
             for member in range (self.membercount):

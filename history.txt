@@ -1,3 +1,6 @@
+#v3.0.1 April 2024
+        Solved issue #5 (Semi colon Users field causes crash).
+
 #v3.0.0 March 2024
         Solved issue #4 (Show location on map):
         - added new input field (Map presentation in Mode5).
