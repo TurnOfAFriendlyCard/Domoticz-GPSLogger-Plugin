@@ -99,11 +99,12 @@ The Android app `GPSLogger` is described at https://gpslogger.app/. Installation
 19. Repeat these steps for every mobile phone involved. Take care to use different `Idx` numbers (step D12).
 
 ### E. Locations
-The plugin comes with a file `locations.txt`. In this files you may define your own locations. Instead of showing the full address in the `location` device the shortname will be shown. The file may look like this (first line not to be changed or removed):
+The plugin comes with a file `locations.txt`. In this files you may define your own locations. Instead of showing the full address in the `location` device the shortname will be shown. The file may look like this (first line not to be changed or removed - no empty lines in the file):
 
-`Name,Latitude,Longitude,Radius`
-
-`Town Hall Rotterdam,51.922710,4.479160,50`
+`Name,Latitude,Longitude,Radius`<br />
+`Town Hall Rotterdam,51.922710,4.479160,50`<br />
+`Tower Brigde London,51.505815,-0.075255,100`<br />
+`Eiffel Tower Paris,48.858278,2.294470,50`<br />
 
 Multiple lines for your own locations can be defined.
 
