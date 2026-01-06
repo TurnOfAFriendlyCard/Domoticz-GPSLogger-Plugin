@@ -1,7 +1,7 @@
-## GOAL
+## 1. GOAL
 Capture location data obtained via GPSLogger app and present in Domoticz devices.
 
-## DESCRIPTION
+## 2. DESCRIPTION
 A mobile phone is used to capture actual location data. The app used for this plugin is `GPSLogger`,
 however other GPS logging apps can be used as well. In fact the most important prerequisite is that the
 app is able to share location data via the `Domoticz API` on regular basis.
@@ -26,8 +26,8 @@ Next devices will be created and updated in Domoticz (in the utility tab unless 
 6. `Map`:      Hyperlink to show the location on a map (separate window will be opened).
 7. `RawData`:  Data which is captured from the GPSLogger app. This device is hidden (only in devices tab).
 
-## INSTALLATION / SETUP
-### A. Plugin
+## 3. INSTALLATION / SETUP
+### 3A. Plugin
 1. Open a `PuTTY` session.
 2. In the session go to the `Plugin` folder of Domoticz.
 3. Download the Plugin: `git clone https://github.com/TurnOfAFriendlyCard/Domoticz-GPSLogger-Plugin`
@@ -39,7 +39,7 @@ Next devices will be created and updated in Domoticz (in the utility tab unless 
 6. Make the plugin.py file executable (`chmod 755 plugin.py`).
 7. Restart Domoticz.
 
-### B. Domoticz
+### 3B. Domoticz
 1. In the hardware tab a new `type` will be available: `GPS Logger Presence`.
 2. Create the new hardware (if version before 3.3.0 was installed, first delete that hardware - new Map device is created):
    - Enter a logical hardware name (for instance `Location`). Will be a prefix to all devices created.
@@ -57,14 +57,14 @@ Next devices will be created and updated in Domoticz (in the utility tab unless 
 5. Determine the `Idx` number in the devices tab for the `RawData` devices. These are required for GPSLogger setup.
 6. Create a specific Domoticz user for the GPSLogger integration (that user will populate the `RawData` devices). Rights `User` and Active Menu `none`. No devices need to be set.
 
-### C. Encode username/password
+### 3C. Encode username/password
 1. Go to the website https://www.base64encode.org/ to encode username and password into Base64 format.
 2. Click on Encode.
 3. Enter `username`:`password` into the text box. This the username/password defined in step B5. Also include the **colon** as separation between username and password.
 4. So the text would look like `LocUser:LocPWD1234` where **LocUser** is the `username` and **LocPWD1234** is the `password`.
 5. Output is something like `TG9jVXNlcjpMb2NQV0QxMjM0` (the example in step 4 should give the exact same result).
 
-### D. GPSLogger
+### 3D. GPSLogger
 The Android app `GPSLogger` is described at https://gpslogger.app/. Installation of the app is via `F-Droid` (Free and Open Source Software).
 1. Open a webbrowser on the mobile phone.
 2. Go to https://f-droid.org/
@@ -98,7 +98,7 @@ The Android app `GPSLogger` is described at https://gpslogger.app/. Installation
 18. The GPSLogger can be closed, will run in the background.
 19. Repeat these steps for every mobile phone involved. Take care to use different `Idx` numbers (step D12).
 
-### E. Locations
+### 3E. Locations
 The plugin comes with a file `locations.txt`. In this files you may define your own locations. Instead of showing the full address in the `location` device the shortname will be shown. The file may look like this (first line not to be changed or removed - no empty lines in the file):
 
 `Name,Latitude,Longitude,Radius`<br />
@@ -108,7 +108,35 @@ The plugin comes with a file `locations.txt`. In this files you may define your 
 
 Multiple lines for your own locations can be defined.
 
-### HISTORY 
+## 4. GENERATE GPX OUTPUT
+A lua script (`generate_gpx.lua`) has been created for generating GPX output. 
+This GPX can be used to view the route that you have travelled.
+The GPX file can be loaded in Android apps like `GPX Viewer` (Vectura Games).
+
+### 4A. Installation
+Next steps are to do:
+1. Create a dummy on/off switch device in Domoticz. Mine is called 'Location - Generate GPX' (just for reference).
+2. Determine what `raw data device` will be used to determine the route travelled. See chapter 2 (Description) point 7. 
+3. Place the LUA script in the DzVents scripts folder.
+4. Edit the LUA script:
+  - Adjust the device names (see step 1 and 2) in line 92 and 93:
+
+           ,  on      = {devices = {'Location - User RawData'
+                                   ,'Location - Generate GPX'
+                                   }
+    
+  - Adjust the `pathFile` variable in line 102.
+  - Activate the script (change value false to true in line 91).
+
+Note: script is reworked from my production environment. That is the reason why it looks more complex than really necessary.
+
+### 4B. Usage
+The moment you start travelling you route, you should switch on the created dummy device (see 4A - Installation - point 1).
+All routepoints and waypoints will be captured until the moment you switch off the dummy device. 
+At that moment a file will be generated like `Track_28_Dec_2025_1022.gpx`.
+This file can used to upload into a GPX viewer app.
+
+## HISTORY 
 The concept is based on the `Life360 Plugin` by fibalci. This plugin is not maintained anymore and also deprecated.
 He thanked Harper Reed for Python implementation of Life 360 API: https://github.com/harperreed/life360-python.
 
